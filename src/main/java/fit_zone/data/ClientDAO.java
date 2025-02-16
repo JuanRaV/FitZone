@@ -79,6 +79,25 @@ public class ClientDAO implements IClientDAO{
 
     @Override
     public boolean addClient(Client client) {
+        PreparedStatement ps;
+        Connection conn = getConnection();
+        String sql = "INSERT INTO client (firstName, lastName, membership) VALUES (?, ?, ?)";
+        try{
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, client.getFirstName());
+            ps.setString(2, client.getLastName());
+            ps.setInt(3, client.getMembership());
+            ps.execute();
+            return true;
+        } catch (Exception e) {
+            System.out.println("ERROR DURING INSERTING CLIENT: " + e.getMessage() );
+        }finally {
+            try{
+              conn.close();
+            } catch (Exception e) {
+                System.out.println("ERROR CLOSING CONNECTION: " + e.getMessage());
+            }
+        }
         return false;
     }
 
@@ -95,18 +114,28 @@ public class ClientDAO implements IClientDAO{
     public static void main(String[] args) {
         IClientDAO clientDao = new ClientDAO();
 
-        //List clients test
-//        System.out.println(" *** CLIENTS LIST ***");
-//        List<Client> clients = clientDao.listClients();
-//        clients.forEach(System.out::println);
 
         //Search by ID
-        var client = new Client(5);
-        System.out.println("CLIENT BEFORE THE SEARCH: " + client);
-        var found = clientDao.searchClientByID(client);
-        if(found)
-            System.out.println("CLIENT FOUND: " + client);
+//        var client = new Client(5);
+//        System.out.println("CLIENT BEFORE THE SEARCH: " + client);
+//        var found = clientDao.searchClientByID(client);
+//        if(found)
+//            System.out.println("CLIENT FOUND: " + client);
+//        else
+//            System.out.println("CLIENT NOT FOUND WITH ID: " + client.getId());
+
+        //Add Client
+        Client client = new Client("Sonia", "Lopez", 600);
+        var clientCreatedSuccessfully = clientDao.addClient(client);
+        if(clientCreatedSuccessfully)
+            System.out.println("CLIENT CREATED SUCCESSFULLY");
         else
-            System.out.println("CLIENT NOT FOUND WITH ID: " + client.getId());
+            System.out.println("CLIENT CANNOT BE CREATED");
+
+
+        //List clients test
+        System.out.println(" *** CLIENTS LIST ***");
+        List<Client> clients = clientDao.listClients();
+        clients.forEach(System.out::println);
     }
 }
