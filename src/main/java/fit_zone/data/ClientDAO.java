@@ -48,6 +48,32 @@ public class ClientDAO implements IClientDAO{
 
     @Override
     public boolean searchClientByID(Client client) {
+        PreparedStatement ps;
+        ResultSet rs;
+        Connection conn = getConnection();
+        String sql = "SELECT * FROM client WHERE id = ?";
+        try{
+            ps = conn.prepareStatement(sql);
+            //Send a parameter
+            //We will send only 1 parameter, and client id
+            ps.setInt(1,client.getId());
+            rs = ps.executeQuery();
+            //Check if we have a record to read
+            if(rs.next()){
+                client.setFirstName(rs.getString("firstName"));
+                client.setLastName(rs.getString("lastName"));
+                client.setMembership(rs.getInt("membership"));
+                return true;
+            }
+        } catch (Exception e) {
+            System.out.println("ERROR DURING GETTING CLIENT WITH ID: " + e.getMessage());
+        } finally {
+            try{
+                conn.close();
+            } catch (Exception e) {
+                System.out.println("ERROR CLOSING DB CONNECTION: " + e.getMessage());
+            }
+        }
         return false;
     }
 
@@ -67,10 +93,20 @@ public class ClientDAO implements IClientDAO{
     }
 
     public static void main(String[] args) {
-        //List clients test
-        System.out.println(" *** CLIENTS LIST ***");
         IClientDAO clientDao = new ClientDAO();
-        var clients = clientDao.listClients();
-        clients.forEach(System.out::println);
+
+        //List clients test
+//        System.out.println(" *** CLIENTS LIST ***");
+//        List<Client> clients = clientDao.listClients();
+//        clients.forEach(System.out::println);
+
+        //Search by ID
+        var client = new Client(5);
+        System.out.println("CLIENT BEFORE THE SEARCH: " + client);
+        var found = clientDao.searchClientByID(client);
+        if(found)
+            System.out.println("CLIENT FOUND: " + client);
+        else
+            System.out.println("CLIENT NOT FOUND WITH ID: " + client.getId());
     }
 }
