@@ -103,6 +103,26 @@ public class ClientDAO implements IClientDAO{
 
     @Override
     public boolean editClient(Client client) {
+        PreparedStatement ps;
+        Connection conn = getConnection();
+        String sql = "UPDATE client SET firstName=?, lastName=?, membership=? WHERE id = ?";
+        try{
+            ps = conn.prepareStatement(sql);
+            ps.setString(1,client.getFirstName());
+            ps.setString(2, client.getLastName());
+            ps.setInt(3,client.getMembership());
+            ps.setInt(4, client.getId());
+            ps.execute();
+            return true;
+        }catch(Exception e){
+            System.out.println("ERROR DURING UPDATING USER: " + e.getMessage());
+        }finally {
+            try{
+                conn.close();
+            } catch (Exception e) {
+                System.out.println("ERROR DURING CLOSING DB CONNECTION: " + e.getMessage());
+            }
+        }
         return false;
     }
 
@@ -125,13 +145,20 @@ public class ClientDAO implements IClientDAO{
 //            System.out.println("CLIENT NOT FOUND WITH ID: " + client.getId());
 
         //Add Client
-        Client client = new Client("Sonia", "Lopez", 600);
-        var clientCreatedSuccessfully = clientDao.addClient(client);
-        if(clientCreatedSuccessfully)
-            System.out.println("CLIENT CREATED SUCCESSFULLY");
-        else
-            System.out.println("CLIENT CANNOT BE CREATED");
+//        Client client = new Client("Sonia", "Lopez", 600);
+//        var clientCreatedSuccessfully = clientDao.addClient(client);
+//        if(clientCreatedSuccessfully)
+//            System.out.println("CLIENT CREATED SUCCESSFULLY");
+//        else
+//            System.out.println("CLIENT CANNOT BE CREATED");
 
+        //Edit client
+        Client client = new Client(1, "Juan Ramon", "Virgen", 100);
+        boolean modified = clientDao.editClient(client);
+        if(modified)
+            System.out.println("CLIENT EDITED SUCCESSFULLY");
+        else
+            System.out.println("SOMETHING WNT WRONG");
 
         //List clients test
         System.out.println(" *** CLIENTS LIST ***");
